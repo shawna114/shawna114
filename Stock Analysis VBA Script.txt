@@ -1,0 +1,127 @@
+Sub Ticker()
+
+'Create a script that will loop through all the stocks for one year and output the following information:
+'The ticker symbol.
+'Yearly change from opening price at the beginning of a given year to the closing price at the end of that year.
+'The percent change from opening price at the beginning of a given year to the closing price at the end of that year.
+'The total stock volume of the stock.
+'You should also have conditional formatting that will highlight positive change in green and negative change in red.
+ 
+'Loop through each worksheet in the active workbook/activating each worksheet
+Dim ws As Worksheet
+For Each ws In ActiveWorkbook.Worksheets
+ws.Activate
+   
+'Set Variables
+Dim Stock_Ticker As String
+Dim Ticker_Total As Double
+Dim Table_Row As Integer
+
+'Set an initial variable for holding the total per Ticker
+Ticker_Total = 0
+  
+'Set Last Row Value
+lrow = Cells(Rows.Count, 2).End(xlUp).Row
+
+'Keep track of the location for each Ticker sign in the summary table
+Table_Row = 2
+  
+Yearly_Open = Cells(2, 3).Value
+  
+'set headers
+Cells(1, 9).Value = "Ticker"
+Cells(1, 10).Value = "Yearly Change"
+Cells(1, 11).Value = "Percent Change"
+Cells(1, 12).Value = "Total Stock Volume"
+Cells(2, 15).Value = "Greatest % Increase"
+Cells(3, 15).Value = "Greatest % Decrease"
+Cells(4, 15).Value = "Greatest Total Volume"
+Cells(1, 16).Value = "Ticker"
+Cells(1, 17).Value = "Value"
+
+'Loop through all credit card purchases
+For i = 2 To lrow
+
+Dim stockPriceAlreadyCaptured As Boolean
+
+If stockPriceAlreadyCaptured = False Then
+'Set opening price
+Dim Opening_Price As Double
+Opening_Price = Cells(i, 3).Value
+
+'Ensures nothing captured until condition met.
+stockPriceAlreadyCaptured = True
+    
+End If
+
+'Check if we are still within the same Ticker, if it is not...
+If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+'Set the stock ticker name
+Stock_Ticker = Cells(i, 1).Value
+      
+Yearly_Close = Cells(i, 6).Value
+stockPriceAlreadyCaptured = False
+ 
+'Add to the Ticker Total
+Ticker_Total = Ticker_Total + Cells(i, 7).Value
+
+'Print the Ticker Name in the Summary Table
+Range("I" & Table_Row).Value = Stock_Ticker
+      
+'Calculates the difference between the Yearly Close amount and the Opening Price
+Range("J" & Table_Row).Value = Yearly_Close - Opening_Price
+      
+'Skip Errors Resulting From Dividing by 0
+On Error Resume Next
+      
+'Calculates the % of change from Year_Close Amount and Opening Price
+Range("K" & Table_Row).Value = (Yearly_Close - Opening_Price) / Opening_Price
+      
+'Resume Error Checking
+On Error GoTo 0
+      
+'Change Column "K" to % Format
+Range("K" & Table_Row).NumberFormat = "0.00%"
+      
+'If column J is > 0, color green
+If Range("J" & Table_Row) > 0 Then Range("J" & Table_Row).Interior.ColorIndex = 4
+      
+'If column J is <0, color red
+If Range("J" & Table_Row) < 0 Then Range("J" & Table_Row).Interior.ColorIndex = 3
+      
+'Calculates min and max percent and max volume and places values in cells
+Range("Q2") = FormatPercent(WorksheetFunction.Max(Range("K:K")))
+Range("Q3") = FormatPercent(WorksheetFunction.Min(Range("K:K")))
+Range("Q4") = WorksheetFunction.Max(Range("L:L"))
+
+'Print the Brand Amount to the Summary Table
+Range("L" & Table_Row).Value = Ticker_Total
+
+'Add one to the summary table row
+Summary_Table_Row = Summary_Table_Row + 1
+      
+'Reset
+Ticker_Total = 0
+Start_Number = 0
+
+'If the cell immediately following a row is the same ticker...
+Else
+
+'Add to the ticker total
+Ticker_Total = Ticker_Total + Cells(i, 7).Value
+      
+End If
+        
+Next i
+
+Next
+
+End Sub
+
+
+
+
+
+
+
